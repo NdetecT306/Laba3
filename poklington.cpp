@@ -187,19 +187,12 @@ int main()
                     uniquePrime.push_back(prime);
                 }
             }
-            char pocklTestResult = '-';
-            if (Pockl(n, t, uniquePrime)) {
-                pocklTestResult = '+';
-            }
-            char millerRabinTestResult = '-';
-            if (MillerRabin(n, t)) {
-                millerRabinTestResult = '+';
-            }
+            char resultChar = MillerRabin(n, t) ? '+' : '-';
             if (!Pockl(n, t, uniquePrime) && MillerRabin(n, t)) {
                 rejected_count++;
             }
             if (Pockl(n, t, uniquePrime) && MillerRabin(n, t)) yes++;
-            cout << setw(5) << i << " | " << setw(12) << n << " | " << setw(7) << millerRabinTestResult << " | " << setw(5) << rejected_count << endl;
+            cout << setw(5) << i << " | " << setw(12) << n << " | " << setw(7) << resultChar << " | " << setw(5) << rejected_count << endl;
         }
     }
     cout << endl;
