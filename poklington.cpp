@@ -1,95 +1,24 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <chrono>
 #include <random>
-#include <algorithm>
-#include <locale>
+#include <chrono>
 #include <set>
+#include <locale>
+#include <algorithm>
+#include <iomanip>
 using namespace std;
-int power(int a, int x, int p) {
+const int N = 10;
+int power(int a, int x, int p) { //Быстрое бинарное возведение в степень
     int res = 1;
-    a = a % p;
+    a %= p;
     if (a == 0) return 0;
     while (x > 0) {
-        if (x % 2 == 1) {
-            res = (long long)res * a % p;
-            if (res < 0) res += p;
-        }
-        a = (long long)a * a % p;
-        if (a < 0) a += p;
+        if (x % 2 == 1) res = (res * a) % p;
+        a = (a * a) % p;
         x = x / 2;
     }
     return res;
-}
-vector<int> RandomNumbers(int t, int start, int end) {
-    vector<int> VremVec(t);
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    ranlux24_base generator(seed);
-    uniform_int_distribution<int> distribution(start, end);
-    for (int i = 0; i < t; ++i) {
-        VremVec[i] = distribution(generator);
-    }
-    return VremVec;
-}
-vector<pair<int, int>> primeFactorization(int n) {
-    vector<pair<int, int>> factors;
-    for (int i = 2; i * i <= n; ++i) {
-        if (n % i == 0) {
-            int count = 0;
-            while (n % i == 0) {
-                n /= i;
-                count++;
-            }
-            factors.push_back({ i, count });
-        }
-    }
-    if (n > 1) {
-        factors.push_back({ n, 1 });
-    }
-    return factors;
-}
-int gcd(int a, int b) {
-    if (a % b == 0)
-        return b;
-    if (b % a == 0)
-        return a;
-    if (a > b)
-        return gcd(a % b, b);
-    return gcd(a, b % a);
-}
-bool pocklingtonTest(int n, int a) {
-    int n_minus_one = n - 1;
-    vector<pair<int, int>> factors = primeFactorization(n_minus_one);
-    if (factors.empty()) {
-        return false;
-    }
-    if (power(a, n_minus_one, n) != 1) {
-        return false;
-    }
-    for (const auto& factor : factors) {
-        int q = factor.first;
-        int gcd_val = gcd(abs(power(a, n_minus_one / q, n) - 1), n);
-        if (gcd_val == 1) {
-            return true;
-        }
-    }
-    return false;
-}
-int generateRandomEven(int bits) {
-    if (bits <= 1) {
-        return 0;
-    }
-    int min_val = (1 << (bits - 1));
-    int max_val = (1 << bits) - 1;
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    ranlux24_base generator(seed);
-    uniform_int_distribution<int> distribution(min_val, max_val);
-    int random_number = distribution(generator);
-    if (random_number % 2 != 0) {
-        random_number--;
-    }
-    return random_number;
 }
 int generateRandomNumber(int length) {
     if (length <= 0) {
@@ -102,7 +31,86 @@ int generateRandomNumber(int length) {
     uniform_int_distribution<int> distribution(min_val, max_val);
     return distribution(generator);
 }
-bool millerRabin(int n, int k) {
+vector<int> RandomNumbers(int t, int start, int end) { //Вектор aj
+    vector<int> VremVec(t);
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    ranlux24_base generator(seed);
+    uniform_int_distribution<int> distribution(start, end);
+    for (int i = 0; i < t; ++i) VremVec[i] = distribution(generator);
+    return VremVec;
+}
+vector<int> ERATOS(int lim) //Функция решета 
+{
+    vector<bool> prime(lim + 1, true);
+    prime[0] = prime[1] = false;
+    for (int p = 2; p <= sqrt(lim); ++p) {
+        if (prime[p]) {
+            for (int i = p * p; i <= lim; i += p) {
+                prime[i] = false;
+            }
+        }
+    }
+    vector<int> ans;
+    for (int p = 2; p <= lim; ++p) {
+        if (prime[p]) ans.push_back(p);
+    }
+    return ans;
+}
+int Random(const vector<int>& primes) {  //Вектор рандомных простых чисел
+    if (primes.empty()) return 0;
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    ranlux24_base generator(seed);
+    uniform_int_distribution<int> distribution(0, primes.size() - 1);
+    return primes[distribution(generator)];
+}
+int RandomStep() { //Рандомная степень
+    int start = 1, end = 7;
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    ranlux24_base generator(seed);
+    uniform_int_distribution<int> distribution(start, end);
+    return distribution(generator);
+}
+int length(int n) {
+    int l = 0;
+    do {
+        l++;
+        n /= 10;
+    } while (n);
+    return l;
+}
+bool Pockl(int n, int t, const vector<int>& Decom) {
+    if (n <= 1) return false;
+    if (n == 2 || n == 3) return true;
+    if (n % 2 == 0) return false;
+    vector<int> VecAj = RandomNumbers(t, 2, n - 1);
+    for (int a : VecAj) { // Для каждого a
+        int result = power(a, n - 1, n); // Вычисляем a^(n-1) mod n
+        if (result != 1) {
+            return false;
+        }
+    }
+    if (Decom.empty()) return true;
+    for (const auto& qi : Decom) {
+        bool check = false;
+        for (int a : VecAj) {
+            if ((n - 1) % qi != 0) {
+                return false; //Cannot use Pocklington if (n-1) % qi != 0
+            }
+            int x = (n - 1) / qi;
+            int result = power(a, x, n);
+            if (result == 1) {  // Modified here: Changed != to ==
+                continue; // a is not a witness for qi
+            }
+            check = true; // a is a witness for qi
+            break;
+        }
+        if (!check) {
+            return false; // No witness found for qi
+        }
+    }
+    return true;
+}
+bool MillerRabin(int n, int t) {
     if (n <= 1) return false;
     if (n <= 3) return true;
     if (n % 2 == 0) return false;
@@ -112,79 +120,86 @@ bool millerRabin(int n, int k) {
         s++;
         r /= 2;
     }
-    for (int i = 0; i < k; i++) {
+    for (int i = 0; i < t; ++i) {
         int a = 2 + rand() % (n - 3);
         int x = power(a, r, n);
-
-        if (x == 1 || x == n - 1)
-            continue;
-        int j = 1;
-        for (; j < s; j++) {
+        if (x == 1 || x == n - 1) continue;
+        for (int j = 0; j < s - 1; ++j) {
             x = power(x, 2, n);
-            if (x == n - 1)
-                break;
+            if (x == n - 1) break;
         }
-        if (j == s)
-            return false;
+        if (x != n - 1) return false;
     }
     return true;
 }
-bool ERROR(int answer, int t, vector<pair<int, int>> primeDecom) {
-    return false;
-}
-vector<int> ERATOS(int limit) {
-    vector<bool> is_prime(limit + 1, true);
-    is_prime[0] = is_prime[1] = false;
-    for (int p = 2; p * p <= limit; ++p) {
-        if (is_prime[p]) {
-            for (int i = p * p; i <= limit; i += p) {
-                is_prime[i] = false;
-            }
-        }
+int main()
+{
+    setlocale(LC_ALL, "rus"); //Русский
+    int lim = 500; //500 чисел
+    vector<int> primes = ERATOS(lim); //Генерируем решето
+    cout << "Выводим решето Эратосфена:" << endl; //Говорим что выводим решето
+    for (int e : primes) {//Сам вывод
+        cout << e << " ";
     }
-    vector<int> primes;
-    for (int p = 2; p <= limit; ++p) {
-        if (is_prime[p]) {
-            primes.push_back(p);
-        }
-    }
-    return primes;
-}
-
-int main() {
-    setlocale(LC_ALL, "rus");
-    int eratosLimit = 500;
-    vector<int> primes = ERATOS(eratosLimit);
-    cout << "Простые числа до " << eratosLimit << ": ";
-    for (int prime : primes) {
-        cout << prime << " ";
-    }
-    cout << endl << "Простые числа, проверенные тестом Поклингтона:" << endl;
-    int length = 4;
+    cout << endl;
+    int l = 4; // Требуемый размер простого числа (количество десятичных цифр)
+    int yes = 0;
     int t = 50;
-    int found_count = 0;
+    int num_experiments = 10;
     vector<int> found_primes;
-    cout << "N\t+/-\tk" << endl;
-    srand(time(0));
-    for (int i = 0; i < 1000 && found_count < 10; ++i) {
-        int k = 0;
-        int answer = generateRandomNumber(length);
-        bool pocklington_passed = false;
-        for (int a_test_count = 0; a_test_count < 1; ++a_test_count) {
-            int a = 2 + rand() % (answer - 3);
-            if (pocklingtonTest(answer, a)) {
-                pocklington_passed = true;
+    int rejected_count = 0;
+    int primes_found = 0;
+    cout << endl;
+    cout << "===================================================================" << endl;
+    cout << setw(5) << "№" << " | " << setw(12) << "p" << " | " << setw(7) << "Test" << " | " << setw(5) << "k" << endl;
+    cout << "-------------------------------------------------------------------" << endl;
+    for (int i = 1; yes < 10; i++) {
+        int F = 1;
+        vector<int> VecPrimes; // Каноническое разложение
+        int curlen = 0;
+        while (curlen < l / 2 + 1) {
+            int randPrime = Random(primes);
+            int randPower = RandomStep();
+            int peremlen = length(pow(randPrime, randPower));
+            if (curlen + peremlen <= l / 2 + 1) {
+                VecPrimes.push_back(randPrime);
+                F *= pow(randPrime, randPower);
+                curlen = length(F); // Update current length
+            }
+            else {
                 break;
             }
-            k++; 
         }
-        if (pocklington_passed && millerRabin(answer, t)) {
-            cout << answer << "\t" << "+" << "\t" << k << endl;
-            found_count++;
-            found_primes.push_back(answer);
-        }
-        else {
-            cout << answer << "\t" << "-" << "\t" << k << endl;
+        if (VecPrimes.empty()) continue; // Skip if F is empt
+        int R_length = l - length(F);//Длина R
+        if (R_length <= 0) continue;
+        int R;
+        do {
+            R = generateRandomNumber(R_length);
+        } while (R % 2 != 0);
+        int n = R * F + 1; 
+        if (length(n) == l) {
+            vector<int> uniquePrime;
+            for (int prime : VecPrimes)
+            {
+                if (find(uniquePrime.begin(), uniquePrime.end(), prime) == uniquePrime.end())
+                {
+                    uniquePrime.push_back(prime);
+                }
+            }
+            char pocklTestResult = '-';
+            if (Pockl(n, t, uniquePrime)) {
+                pocklTestResult = '+';
+            }
+            char millerRabinTestResult = '-';
+            if (MillerRabin(n, t)) {
+                millerRabinTestResult = '+';
+            }
+            if (!Pockl(n, t, uniquePrime) && MillerRabin(n, t)) {
+                rejected_count++;
+            }
+            if (Pockl(n, t, uniquePrime) && MillerRabin(n, t)) yes++;
+            cout << setw(5) << i << " | " << setw(12) << n << " | " << setw(7) << millerRabinTestResult << " | " << setw(5) << rejected_count << endl;
         }
     }
     cout << endl;
