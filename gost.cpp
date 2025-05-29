@@ -1,19 +1,18 @@
 #include <iostream>
 #include <vector>
-#include <random>
-#include <chrono>
 #include <cmath>
-#include <algorithm>
-#include <set>
+#include <iomanip>
+#include <chrono>
+#include <random>
 #include <locale>
 using namespace std;
-int power(int base, int exp, int mod) {
+int power(int a, int x, int p) {
     int res = 1;
-    base %= mod;
-    while (exp > 0) {
-        if (exp % 2 == 1) res = (1LL * res * base) % mod;
-        base = (1LL * base * base) % mod;
-        exp >>= 1;
+    a %= p;
+    while (x > 0) {
+        if (x % 2 == 1) res = (res * a) % p;
+        a = (a * a) % p;
+        x >>= 1;
     }
     return res;
 }
@@ -119,44 +118,45 @@ int binaryLength(int n) {
     }
     return length;
 }
+int generatePrimeGOST(int t, int q, int& u_value) {
+    int N = ceil(pow(2, t - 1) / q);
+    if (N % 2 != 0) {
+        N++;
+    }
+    int u = 0;
+    while (true) {
+        int p = (N + u) * q + 1;
+        if (p > pow(2, t + 5)) {
+            return -1; 
+        }
+        if (power(2, p - 1, p) == 1 && power(2, N + u, p) != 1) {
+            u_value = u;
+            return p;
+        }
+        u += 2;
+    }
+}
 int main() {
     setlocale(LC_ALL, "rus");
     int eratosLimit = 500;
     vector<int> primes = ERATOS(eratosLimit);
-    cout << "Простые числа до " << eratosLimit << ": ";
-    for (int prime : primes) {
-        cout << prime << " ";
-    }
-    cout << endl;
-    int t = 10;
-    int colvo = 0;
-    cout << "Поиск p с использованием теста Дьемиетко:" << endl;
-    cout << "p\t+/-\tq" << endl;
-    for (int q_index = 0; q_index < primes.size(); q_index++) {
+    int t = 8; 
+    int numPrimesToGenerate = 10;
+    cout << "-------------------------------------" << endl;
+    cout << setw(5) << "№" << " | " << setw(15) << "p (ГОСТ)" << " | " << setw(5) << "+/-" << " | " << endl;
+    cout << "-------------------------------------" << endl;
+    int rejectedCount = 0;
+    vector<int> rejectedNumbers;
+    for (int i = 0; i < numPrimesToGenerate; ++i) {
+        int q_index = i % primes.size(); 
         int q = primes[q_index];
-        int q_length = binaryLength(q);
-        int target_length = t / 2;
-        if (q_length != target_length) {
-            continue;
-        }
-        int N_min = ceil(pow(2, t - 1) / q);
-        if (N_min % 2 != 0) {
-            N_min++;
-        }
-        for (int N = N_min; N < N_min + 100000 && colvo < 10; N += 2)
-        {
-            int p = N * q + 1;
-            if (p > pow(2, t + 5)) {
-                break;
-            }
-            if (diemietko_test(p, N)) {
-                cout << p << "\t+\t" << q << endl;
-                colvo++;
-            }
-            else {
-                cout << p << "\t-\t" << q << endl;
-            }
-
+        int u_value = 0;
+        int p_gost = generatePrimeGOST(t, q, u_value); 
+        bool mr_test = millerRabin(p_gost, 20); 
+        cout << setw(5) << i + 1 << " | " << setw(15) << p_gost << " | " << setw(5) << (mr_test ? "+" : "-") << " | " << endl;
+        if (!mr_test) {
+            rejectedCount++;
+            rejectedNumbers.push_back(p_gost);
         }
     }
     return 0;
