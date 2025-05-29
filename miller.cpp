@@ -5,67 +5,60 @@
 #include <algorithm>
 #include <set>
 #include <cmath>
+#include <iomanip>
 using namespace std;
-
-vector<int> ERATOS(int limit) {
-    vector<bool> is_prime(limit + 1, true);
-    is_prime[0] = is_prime[1] = false;
-    for (int p = 2; p * p <= limit; ++p) {
-        if (is_prime[p]) {
-            for (int i = p * p; i <= limit; i += p) {
-                is_prime[i] = false;
+const int N = 10;
+vector<int> ERATOS(int lim) //Функция решета 
+{
+    vector<bool> prime(lim + 1, true);
+    prime[0] = prime[1] = false;
+    for (int p = 2; p <= sqrt(lim); ++p) {
+        if (prime[p]) {
+            for (int i = p * p; i <= lim; i += p) {
+                prime[i] = false;
             }
         }
     }
-    vector<int> primes;
-    for (int p = 2; p <= limit; ++p) {
-        if (is_prime[p]) {
-            primes.push_back(p);
-        }
+    vector<int> ans;
+    for (int p = 2; p <= lim; ++p) { //Если простое - записываем в конечный вектор
+        if (prime[p]) ans.push_back(p);
     }
-    return primes;
+    return ans;
 }
-int power(int a, int x, int p) {
+int power(int a, int x, int p) { //Быстрое бинарное возведение в степень
     int res = 1;
-    a = a % p;
+    a %= p;
     if (a == 0) return 0;
     while (x > 0) {
-        if (x % 2 == 1) {
-            res = (res * a) % p;
-        }
+        if (x % 2 == 1) res = (res * a) % p;
         a = (a * a) % p;
         x = x / 2;
     }
     return res;
 }
-vector<int> RandomNumbers(int t, int start, int end) {
+vector<int> RandomNumbers(int t, int start, int end) { //Вектор aj
     vector<int> VremVec(t);
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     ranlux24_base generator(seed);
     uniform_int_distribution<int> distribution(start, end);
-    for (int i = 0; i < t; ++i) {
-        VremVec[i] = distribution(generator);
-    }
+    for (int i = 0; i < t; ++i) VremVec[i] = distribution(generator);
     return VremVec;
 }
-vector<pair<int, int>> primeFactorization(int n) {
-    vector<pair<int, int>> factors;
-    for (int i = 2; i * i <= n; ++i) {
-        if (n % i == 0) {
-            int count = 0;
-            while (n % i == 0) {
-                n /= i;
-                count++;
-            }
-            factors.push_back({ i, count });
-        }
-    }
-    if (n > 1) {
-        factors.push_back({ n, 1 });
-    }
-    return factors;
+int Random(const vector<int>& primes) { //Вектор рандомных простых чисел
+    if (primes.empty()) return 0;
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    ranlux24_base generator(seed);
+    uniform_int_distribution<int> distribution(0, primes.size() - 1);
+    return primes[distribution(generator)];
 }
-bool millerRabin(int n, int k) {
+int RandomStep() { //Рандомная степень
+    int start = 1, end = 7;
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    ranlux24_base generator(seed);
+    uniform_int_distribution<int> distribution(start, end);
+    return distribution(generator);
+}
+bool MillerRabin(int n, int t) {
     if (n <= 1) return false;
     if (n <= 3) return true;
     if (n % 2 == 0) return false;
@@ -75,7 +68,7 @@ bool millerRabin(int n, int k) {
         s++;
         r /= 2;
     }
-    for (int i = 0; i < k; ++i) {
+    for (int i = 0; i < t; ++i) {
         int a = 2 + rand() % (n - 3);
         int x = power(a, r, n);
         if (x == 1 || x == n - 1) continue;
@@ -87,78 +80,122 @@ bool millerRabin(int n, int k) {
     }
     return true;
 }
-bool ERROR(int n, int t, const vector<pair<int, int>>& Decom) {
-    if (n <= 1) return false;
-    if (n == 2) return false;
-    vector<int> VecAj = RandomNumbers(t, 2, n - 1);
-    for (int a : VecAj) {
-        int result = power(a, n - 1, n);
-        if (result != 1) {
-            return true;
+bool MILLER(int n, int t, const vector<int>& Decom) { //Вводим число, надежность и разложение 
+    if (n <= 1) return false; //Если n <=1 - заведомо не подходит
+    if (n == 2 || n == 3) return true;
+    if (n % 2 == 0) return false; 
+    vector<int> VecAj = RandomNumbers(t, 2, n - 1); // Выбираем t чисел: 1 < a < n 
+    for (int a : VecAj) { // Для каждого a
+        int result = power(a, n - 1, n); // Вычисляем a^(n-1) mod n
+        if (result != 1) { // Если какой-либо из результатов не равен «1», то идти на Выход с сообщением «n –составное число».
+            return false;
         }
     }
-    if (Decom.empty()) return false;
-    for (const auto& elem : Decom) {
-        int qi = elem.first;
-        bool check = true;
-        for (int a : VecAj) {
-            int x = (n - 1) / qi;
-            if ((n - 1) % qi != 0) {
-                return false;
-            }
-            int result = power(a, x, n);
-            if (result != 1) {
-                check = false;
-                break;
+    if (Decom.empty()) return true; 
+    for (const auto& qi : Decom) { //Разложение числа
+        bool all_one = true; 
+        for (int a : VecAj) { //Для всех a
+            if ((n - 1) % qi != 0) return false;
+            int x = (n - 1) / qi; // Считаем степень для a
+            int result = power(a, x, n);//Считаем a^((p-1)/qi mod n или a^xmod n
+            if (result == 1) continue;
+            else {
+                all_one = false;
+                break; 
             }
         }
-        if (check) {
-            return true;
-        }
+        if (all_one) return false;  
     }
-    return false;
+    return true;
 }
-int generateRandomNumber(int length) {
-    if (length <= 0) {
-        return 0;
-    }
-    int min_val = pow(10, length - 1);
-    int max_val = pow(10, length) - 1;
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    ranlux24_base generator(seed);
-    uniform_int_distribution<int> distribution(min_val, max_val);
-    return distribution(generator);
+int length(int n) {//Проверка длины числа
+    int l = 0;
+    do {
+        l++;
+        n /= 10;
+    } while (n);
+    return l;
 }
-int main() {
-    setlocale(LC_ALL, "rus");
-    int eratosLimit =500; 
-    vector<int> primes = ERATOS(eratosLimit);
-    cout << "Простые числа до " << eratosLimit << ": ";
-    for (int prime : primes) {
-        cout << prime << " ";
-    }
-    cout << endl << "Простые числа, проверенные тестом Миллера:" << endl;
-    int length = 4;
-    int t = 50;
-    int found_count = 0;
-    vector<int> found_primes;
-    cout << "N\t+/-\tk" << endl;
-    for (int i = 0; i < 1000 && found_count < 10; ++i) {
-        int k = 0;
-        int answer = generateRandomNumber(length);
-        vector<pair<int, int>> primeDecom = primeFactorization(answer - 1);
-        if (!ERROR(answer, t, primeDecom)) {
-            if (millerRabin(answer, t)) {
-                cout << answer << "\t" << "+" << "\t" << k << endl;
-                found_count++;
-            }
-            else
-            {
-                k++;
-                cout << answer << "\t" << "-" << "\t" << k << endl;
-            }
-        }
+int main()
+{
+    setlocale(LC_ALL, "rus"); //Русский
+    int lim = 500; //500 чисел
+    vector<int> primes = ERATOS(lim); //Генерируем решето
+    cout << "Выводим решето Эратосфена:" << endl; //Говорим что выводим решето
+    for (int e : primes) {//Сам вывод
+        cout << e << " ";
     }
     cout << endl;
+    int t = 50;//Итерации для тестов
+    int l_min = 3; //Длины чисел m и n
+    int l_max = 4;
+    int k = 0;
+    int countSost = 0;
+    vector<int> primeNumbers;
+    int yes = 0;
+    cout << "-------------------------------------------------" << endl;
+    cout << "|  №  |   p   | Результат теста |   k   |" << endl;
+    cout << "-------------------------------------------------" << endl;
+    for (int i = 0; yes < 10; ++i) {
+        int m = 1; //m = 1
+        vector<int> VecPrimes; // Каноническое разложение
+        vector<int> VecPowers; // Степени простых чисел
+        while (length(m) < l_min) {
+            int randPrime = Random(primes);
+            int randPower = RandomStep();
+            VecPrimes.push_back(randPrime);
+            VecPowers.push_back(randPower);
+            m *= pow(randPrime, randPower);
+        }
+        while (length(m) > l_max - 1 && m > 1) {
+            int lastPrime = VecPrimes.back();
+            int lastPower = VecPowers.back();
+            VecPrimes.pop_back();
+            VecPowers.pop_back();
+            m /= pow(lastPrime, lastPower); // Уменьшаем m
+            // Генерируем новое простое число и степень
+            int newRandPrime = Random(primes);
+            int newRandPower = RandomStep();
+            VecPrimes.push_back(newRandPrime);
+            VecPowers.push_back(newRandPower);
+            m *= pow(newRandPrime, newRandPower);
+            if (length(m) < l_min) {
+                VecPrimes.push_back(lastPrime);
+                VecPowers.push_back(lastPower);
+                m *= pow(lastPrime, lastPower);
+            }
+        }
+        int n = 2 * m + 1;
+        if (length(n) < l_max) {
+            int newRandPrime = Random(primes);
+            int newRandPower = RandomStep();
+            VecPrimes.push_back(newRandPrime);
+            VecPowers.push_back(newRandPower);
+            m *= pow(newRandPrime, newRandPower);
+            n = 2 * m + 1;
+        }
+        while (length(n) > l_max + 1) {
+            int lastPrime = VecPrimes.back();
+            int lastPower = VecPowers.back();
+            VecPrimes.pop_back();
+            VecPowers.pop_back();
+            m /= pow(lastPrime, lastPower); // Уменьшаем m
+            int newRandPrime = Random(primes);
+            int newRandPower = RandomStep();
+            VecPrimes.push_back(newRandPrime);
+            VecPowers.push_back(newRandPower);
+            m *= pow(newRandPrime, newRandPower);
+            n = 2 * m + 1;
+        }
+        if (MILLER(n, t, VecPrimes)) {
+            char resultChar =  MillerRabin(n, t) ? '+' : '-';
+            cout << setw(4) << i << " |" << setw(7) << n << " |" << setw(16) << resultChar << " |" << setw(5) << k << " |" << endl;
+            yes++;
+        }
+        else {
+            countSost++;
+        }
+    }
+    cout << "Количество составных чисел: " << countSost << endl;
     return 0;
 }
