@@ -6,6 +6,7 @@
 #include <set>
 #include <cmath>
 #include <iomanip>
+
 using namespace std;
 const int N = 10;
 vector<int> ERATOS(int lim) //Функция решета 
@@ -132,11 +133,12 @@ int main()
     int k = 0;
     int countSost = 0;
     vector<int> primeNumbers;
+    vector<int> generatedNumbers;
     int yes = 0;
     cout << "-------------------------------------------------" << endl;
     cout << "|  №  |   p   | Результат теста |   k   |" << endl;
     cout << "-------------------------------------------------" << endl;
-    for (int i = 0; yes < 10; ++i) {
+    for (int i = 1; yes < 10; i++) {
         int m = 1; //m = 1
         vector<int> VecPrimes; // Каноническое разложение
         vector<int> VecPowers; // Степени простых чисел
@@ -187,15 +189,35 @@ int main()
             m *= pow(newRandPrime, newRandPower);
             n = 2 * m + 1;
         }
-        if (MILLER(n, t, VecPrimes)) {
-            char resultChar =  MillerRabin(n, t) ? '+' : '-';
-            cout << setw(4) << i << " |" << setw(7) << n << " |" << setw(16) << resultChar << " |" << setw(5) << k << " |" << endl;
+        bool duplicate = false;
+        for (int num : generatedNumbers) {
+            if (num == n) {
+                duplicate = true;
+                break;
+            }
+        }
+        if (duplicate) {
+            continue;
+        }
+        generatedNumbers.push_back(n);
+        vector<int> decom; // Разложение n-1 (2*m) = простые делители m
+        for (int j = 0; j < VecPrimes.size(); ++j) {
+            for (int l = 0; l < VecPowers[j]; ++l) {
+                decom.push_back(VecPrimes[j]);
+            }
+        }
+        if (MILLER(n, t, decom)) {
+            cout << setw(5) << i << " | " << setw(10) << n << " | " << setw(10) << "+" << " | " << setw(5) << k << endl;
+            primeNumbers.push_back(n);
             yes++;
+
         }
         else {
-            countSost++;
+            if (MillerRabin(n, t)) {
+                k++; // Увеличиваем k, если MillerRabin считает число простым
+            }
+            cout << setw(5) << i << " | " << setw(10) << n << " | " << setw(10) << "-" << " | " << setw(5) << k << endl;
         }
     }
-    cout << "Количество составных чисел: " << countSost << endl;
     return 0;
 }
