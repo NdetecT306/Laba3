@@ -99,16 +99,8 @@ vector<int> ERATOS(int limit) {
     }
     return primes;
 }
-bool diemietko_test(int p, int N)
-{
+bool diemietko_test(int p, int N) {
     return (power(2, p - 1, p) == 1) && (power(2, N, p) != 1);
-}
-bool isPrime(int n) {
-    if (n <= 1) return false;
-    for (int i = 2; i <= sqrt(n); i++) {
-        if (n % i == 0) return false;
-    }
-    return true;
 }
 int binaryLength(int n) {
     int length = 0;
@@ -118,8 +110,10 @@ int binaryLength(int n) {
     }
     return length;
 }
-int generatePrimeGOST(int t, int q, int& u_value) {
-    int N = ceil(pow(2, t - 1) / q);
+int generatePrimeGOST(int t, int q, int& uVal) {
+    double n = pow(2, t - 1);
+    double per = n / q;
+    int N = ceil(per);
     if (N % 2 != 0) {
         N++;
     }
@@ -130,7 +124,7 @@ int generatePrimeGOST(int t, int q, int& u_value) {
             return -1; 
         }
         if (power(2, p - 1, p) == 1 && power(2, N + u, p) != 1) {
-            u_value = u;
+            uVal = u;
             return p;
         }
         u += 2;
@@ -140,24 +134,30 @@ int main() {
     setlocale(LC_ALL, "rus");
     int eratosLimit = 500;
     vector<int> primes = ERATOS(eratosLimit);
-    int t = 8; 
+    int t = 7; 
     int numPrimesToGenerate = 10;
     cout << "-------------------------------------" << endl;
-    cout << setw(5) << "№" << " | " << setw(15) << "p (ГОСТ)" << " | " << setw(5) << "+/-" << " | " << endl;
+    cout << setw(5) << "№" << " | " << setw(15) << "p (ГОСТ)" << " | "<< setw(5) << "+/-" << " | " << endl;
     cout << "-------------------------------------" << endl;
     int rejectedCount = 0;
     vector<int> rejectedNumbers;
     for (int i = 0; i < numPrimesToGenerate; ++i) {
-        int q_index = i % primes.size(); 
+        int q_index = i % primes.size();
         int q = primes[q_index];
         int u_value = 0;
-        int p_gost = generatePrimeGOST(t, q, u_value); 
-        bool mr_test = millerRabin(p_gost, 20); 
-        cout << setw(5) << i + 1 << " | " << setw(15) << p_gost << " | " << setw(5) << (mr_test ? "+" : "-") << " | " << endl;
+        int p_gost = generatePrimeGOST(t, q, u_value);
+        if (p_gost == -1) {
+            cout << setw(5) << i + 1 << " | " << setw(15) << "Failed to find" << " | "<< setw(5) << "-" << " | " << endl;
+            continue;
+        }
+        bool mr_test = millerRabin(p_gost, 20);
+        cout << setw(5) << i + 1 << " | " << setw(15) << p_gost << " | "<< setw(5) << (mr_test ? "+" : "-") << " | " << endl;
         if (!mr_test) {
             rejectedCount++;
             rejectedNumbers.push_back(p_gost);
         }
     }
+    cout << "-------------------------------------" << endl;
+    cout << "Rejected Count: " << rejectedCount << endl;
     return 0;
 }
