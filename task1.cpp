@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <cmath>
 using namespace std;
+//Высчитываем y согласно x
 double charts(double x) {
     double result = 0;
     if (x >= -4 && x <= 0) {
@@ -19,16 +20,18 @@ double charts(double x) {
     }
     return result;
 }
+//Задаем начало, конец и шаг(со знаком). Проходим по циклу и выдаем точки.
 int main() {
     setlocale(LC_ALL, "rus");
-    double x_start, x_end, dx;
-    double y;
+    double x_start, x_end, dx, y, digit;
     cout << "Введите начало прохода: ";
     cin >> x_start;
     cout << "Введите конец прохода: ";
     cin >> x_end;
-    cout << "Введите шаг прохода со знаком (+ = от меньшего к большему, - = от большего к меньшему): ";
+    cout << "Введите шаг прохода со знаком (никакой, если от меньшего к большему, -, если от большего к меньшему): ";
     cin >> dx;
+    cout << "Ведите ожидаемую точность посчитанного числа (мало ли, вдруг вы хотите разногласий): ";
+    cin >> digit;
     if (x_start < -4 || x_end < -4) {
         cout << "Выход за границу графика" << endl;
         return 0;
@@ -40,7 +43,7 @@ int main() {
     cout << "---------------" << endl;
     cout << "|   x  |   y  |" << endl;
     cout << "---------------" << endl;
-    cout << fixed << setprecision(5);
+    cout << fixed << setprecision(digit);
     if (x_start < x_end) {
         for (double x = x_start; x <= x_end; x += dx) 
         {
