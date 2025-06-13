@@ -6,7 +6,7 @@
 #include <random>
 #include <locale>
 using namespace std;
-int power(int a, int x, int p) {
+int power(int a, int x, int p) { //Быстрое бинарное возведение в степень
     int res = 1;
     a %= p;
     while (x > 0) {
@@ -16,7 +16,7 @@ int power(int a, int x, int p) {
     }
     return res;
 }
-vector<int> RandomNumbers(int t, int start, int end) {
+vector<int> RandomNumbers(int t, int start, int end) { //Рандомный вектор
     vector<int> VremVec(t);
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     ranlux24_base generator(seed);
@@ -26,7 +26,7 @@ vector<int> RandomNumbers(int t, int start, int end) {
     }
     return VremVec;
 }
-vector<pair<int, int>> primeFactorization(int n) {
+vector<pair<int, int>> primeFactorization(int n) { //Рандомный вектор из корней
     vector<pair<int, int>> factors;
     for (int i = 2; i * i <= n; ++i) {
         if (n % i == 0) {
@@ -43,7 +43,7 @@ vector<pair<int, int>> primeFactorization(int n) {
     }
     return factors;
 }
-int generateRandomNumber(int length) {
+int generateRandomNumber(int length) { //Генерация рандоиной длины
     if (length <= 0) {
         return 0;
     }
@@ -54,7 +54,7 @@ int generateRandomNumber(int length) {
     uniform_int_distribution<int> distribution(min_val, max_val);
     return distribution(generator);
 }
-bool millerRabin(int n, int k) {
+bool millerRabin(int n, int k) { //Миллер-Рабин на всякий
     if (n <= 1) return false;
     if (n <= 3) return true;
     if (n % 2 == 0) return false;
@@ -81,7 +81,7 @@ bool millerRabin(int n, int k) {
     }
     return true;
 }
-vector<int> ERATOS(int limit) {
+vector<int> ERATOS(int limit) { //Решето
     vector<bool> is_prime(limit + 1, true);
     is_prime[0] = is_prime[1] = false;
     for (int p = 2; p * p <= limit; ++p) {
@@ -99,10 +99,10 @@ vector<int> ERATOS(int limit) {
     }
     return primes;
 }
-bool diemietko_test(int p, int N) {
+bool diemietko_test(int p, int N) { //Тот самый тест (теорема) из файла
     return (power(2, p - 1, p) == 1) && (power(2, N, p) != 1);
 }
-int binaryLength(int n) {
+int binaryLength(int n) {//Длина в битах (побитовый сдвиг)
     int length = 0;
     while (n > 0) {
         n >>= 1;
@@ -110,7 +110,7 @@ int binaryLength(int n) {
     }
     return length;
 }
-int generatePrimeGOST(int t, int q, int& uVal) {
+int generatePrimeGOST(int t, int q, int& uVal) { //генерация простоты числа для ГОСТа
     double n = pow(2, t - 1);
     double per = n / q;
     int N = ceil(per);
@@ -130,11 +130,11 @@ int generatePrimeGOST(int t, int q, int& uVal) {
         u += 2;
     }
 }
-int main() {
+int main() { //Ну и main для генерации 10 простых чисел определенной длины
     setlocale(LC_ALL, "rus");
     int eratosLimit = 500;
     vector<int> primes = ERATOS(eratosLimit);
-    int t = 7; 
+    int t = 13; 
     int numPrimesToGenerate = 10;
     cout << "-------------------------------------" << endl;
     cout << setw(5) << "№" << " | " << setw(15) << "p (ГОСТ)" << " | "<< setw(5) << "+/-" << " | " << endl;
@@ -147,7 +147,7 @@ int main() {
         int u_value = 0;
         int p_gost = generatePrimeGOST(t, q, u_value);
         if (p_gost == -1) {
-            cout << setw(5) << i + 1 << " | " << setw(15) << "Failed to find" << " | "<< setw(5) << "-" << " | " << endl;
+            cout << setw(5) << i + 1 << " | " << setw(15) << "Не найдено" << " | "<< setw(5) << "-" << " | " << endl;
             continue;
         }
         bool mr_test = millerRabin(p_gost, 20);
@@ -158,6 +158,5 @@ int main() {
         }
     }
     cout << "-------------------------------------" << endl;
-    cout << "Rejected Count: " << rejectedCount << endl;
     return 0;
 }
