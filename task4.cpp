@@ -9,27 +9,23 @@ int main() {
     cout << "Введите количество элементов последовательности: ";
     int n;
     cin >> n;
-    if (n < 4 || n > 50001) 
-    {
+    if (n < 4 || n > 50001) {
         cout << "Неправильный ввод" << endl;
         return 1;
     }
     cout << "Введите максимальное количество взятых элементов: ";
     int m;
     cin >> m;
-    if (m < 3 || m > 101) 
-    {
+    if (m < 3 || m > 101) {
         cout << "Неправильный ввод" << endl;
         return 1;
     }
-    if (m >= n) 
-    {
+    if (m >= n) {
         cout << "Слушай, а ловко ты это придумал. Я даже сначала не понял. Молодец!" << endl;
         return 1;
     }
     vector<int> posl(n);
-    for (int i = 0; i < n; ++i) 
-    {
+    for (int i = 0; i < n; ++i) {
         cin >> posl[i];
     }
     int sumPasha = 0;
@@ -49,23 +45,19 @@ int main() {
                 bestMove = k;
             }
         }
-        if (Turn)
-        {
+        if (Turn){
             sumPasha += bestSum;
         }
-        else
-        {
+        else{
             sumVika += bestSum;
         }
         ind += bestMove;
         Turn = !Turn;
     }
-    if (sumPasha > sumVika) 
-    {
+    if (sumPasha > sumVika) {
         cout << "1" << endl;
     }
-    else 
-    {
+    else {
         cout << "0" << endl;
     }
     return 0;
