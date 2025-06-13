@@ -3,13 +3,11 @@
 #include <cmath>
 #include <iomanip>
 using namespace std;
-vector<pair<double, double>> cofe(double Tk, double Ts, double r, double time, double dt) 
-{
+vector<pair<double, double>> cofe(double Tk, double Ts, double r, double time, double dt) {
     vector<pair<double, double>> Vec_coffee;
     double t = 0.0;
     double T = Tk;
-    while (t <= time)
-    {
+    while (t <= time){
         Vec_coffee.push_back({ t, T });
         double dTdt = -r * (T - Ts);
         T = T + dTdt * dt;
@@ -17,15 +15,13 @@ vector<pair<double, double>> cofe(double Tk, double Ts, double r, double time, d
     }
     return Vec_coffee;
 }
-pair<double, double> approx(const vector<pair<double, double>>& coffee)
-{
+pair<double, double> approx(const vector<pair<double, double>>& coffee){
     int n = coffee.size();
     double sum_x = 0.0;
     double sum_y = 0.0;
     double sum_xy = 0.0;
     double sum_x2 = 0.0;
-    for (const auto& el : coffee) 
-    {
+    for (const auto& el : coffee) {
         sum_x += el.first;
         sum_y += el.second;
         sum_xy += el.first * el.second;
@@ -35,21 +31,18 @@ pair<double, double> approx(const vector<pair<double, double>>& coffee)
     double b = (sum_y - a * sum_x) / n;
     return {a, b};
 }
-int main() 
-{
+int main() {
     setlocale(LC_ALL, "rus");
     double Tk, Ts, r, time = 30, dt = 0.1;
     cout << "Введите начальную температуру кофе (T): ";
     cin >> Tk;
-    if (Tk > 100 || Tk<0)
-    {
+    if (Tk > 100 || Tk<0){
         cout << "У Вас ОЧЕНЬ странный кофе";
         return 1;
     }
     cout << "Введите температуру окружающей среды (Ts): ";
     cin >> Ts;
-    if (Tk == Ts)
-    {
+    if (Tk == Ts){
         cout << "С кофе ничего не произойдет";
         return 1;
     }
@@ -67,4 +60,3 @@ int main()
     cout << "a = " << params.first << endl << "b = " << params.second << endl;
     return 0;
 }
-
