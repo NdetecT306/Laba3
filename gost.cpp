@@ -99,9 +99,6 @@ vector<int> ERATOS(int limit) { //Решето
     }
     return primes;
 }
-bool diemietko_test(int p, int N) { //Тот самый тест (теорема) из файла
-    return (power(2, p - 1, p) == 1) && (power(2, N, p) != 1);
-}
 int binaryLength(int n) {//Длина в битах (побитовый сдвиг)
     int length = 0;
     while (n > 0) {
